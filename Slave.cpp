@@ -184,9 +184,11 @@ void Slave::createTable(RelayLogInfo& rli,
                       << " Field type: " << extract_field );
 
         PtrField field;
+        
+        bool bUnsigned = NULL != ::strcasestr(type.c_str(), "unsigned");
 
         if (extract_field == "int")
-            field = PtrField(new Field_long(name, type));
+            field = bUnsigned ? PtrField(new Field_long_unsigned(name, type)) : PtrField(new Field_long(name, type));
 
         else if (extract_field == "double")
             field = PtrField(new Field_double(name, type));
@@ -222,16 +224,16 @@ void Slave::createTable(RelayLogInfo& rli,
             field = PtrField(new Field_varstring(name, type, ci));
 
         else if (extract_field == "tinyint")
-            field = PtrField(new Field_tiny(name, type));
+            field = bUnsigned ? PtrField(new Field_tiny_unsigned(name, type)) : PtrField(new Field_tiny(name, type));
 
         else if (extract_field == "smallint")
-            field = PtrField(new Field_short(name, type));
+            field = bUnsigned ? PtrField(new Field_short_unsigned(name, type)) : PtrField(new Field_short(name, type));
 
         else if (extract_field == "mediumint")
-            field = PtrField(new Field_medium(name, type));
+            field = bUnsigned ? PtrField(new Field_medium_unsigned(name, type)) : PtrField(new Field_medium(name, type));
 
         else if (extract_field == "bigint")
-            field = PtrField(new Field_longlong(name, type));
+            field = bUnsigned ? PtrField(new Field_longlong_unsigned(name, type)) : PtrField(new Field_longlong(name, type));
 
         else if (extract_field == "text")
             field = PtrField(new Field_blob(name, type));

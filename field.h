@@ -56,10 +56,10 @@ public:
 };
 
 class Field_num: public Field {
+
 public:
     Field_num(const std::string& field_name_arg, const std::string& type);
 };
-
 
 class Field_str: public Field {
 public:
@@ -86,41 +86,73 @@ public:
 };
 
 class Field_tiny: public Field_num {
-    unsigned int pack_length() const { return 1; }
 public:
     Field_tiny(const std::string& field_name_arg, const std::string& type);
+    const char* unpack(const char* from);
+protected:
+    unsigned int pack_length() const { return 1; }
+};
+
+class Field_tiny_unsigned: public Field_tiny {
+public:
+    Field_tiny_unsigned(const std::string& field_name_arg, const std::string& type);
     const char* unpack(const char* from);
 };
 
 class Field_short: public Field_num {
-    unsigned int pack_length() const { return 2; }
 public:
     Field_short(const std::string& field_name_arg, const std::string& type);
+    const char* unpack(const char* from);
+protected:
+    unsigned int pack_length() const { return 2; }
+};
+
+class Field_short_unsigned: public Field_short {
+public:
+    Field_short_unsigned(const std::string& field_name_arg, const std::string& type);
 
     const char* unpack(const char* from);
 };
 
 class Field_medium: public Field_num {
-    unsigned int pack_length() const { return 3; }
 public:
     Field_medium(const std::string& field_name_arg, const std::string& type);
+    const char* unpack(const char* from);
+protected:
+    unsigned int pack_length() const { return 3; }
+};
 
+class Field_medium_unsigned: public Field_medium {
+public:
+    Field_medium_unsigned(const std::string& field_name_arg, const std::string& type);
     const char* unpack(const char* from);
 };
 
 class Field_long: public Field_num {
-    unsigned int pack_length() const { return 4; }
 public:
     Field_long(const std::string& field_name_arg, const std::string& type);
+    const char* unpack(const char* from);
+protected:
+    unsigned int pack_length() const { return 4; }
+};
 
+class Field_long_unsigned : public Field_long {
+public:
+    Field_long_unsigned(const std::string& field_name_arg, const std::string& type);
     const char* unpack(const char* from);
 };
 
 class Field_longlong: public Field_num {
-    unsigned int pack_length() const { return 8; }
 public:
     Field_longlong(const std::string& field_name_arg, const std::string& type);
+    const char* unpack(const char* from);
+protected:
+    unsigned int pack_length() const { return 8; }
+};
 
+class Field_longlong_unsigned: public Field_longlong {
+public:
+    Field_longlong_unsigned(const std::string& field_name_arg, const std::string& type);
     const char* unpack(const char* from);
 };
 

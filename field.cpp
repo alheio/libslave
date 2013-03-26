@@ -24,6 +24,7 @@
 
 #include "dec_util.h"
 #include "field.h"
+#include "types.h"
 
 #include "Logging.h"
 
@@ -33,76 +34,143 @@
 namespace slave
 {
 
-
-
 Field_num::Field_num(const std::string& field_name_arg, const std::string& type):
     Field(field_name_arg, type) {}
-
+    
 Field_tiny::Field_tiny(const std::string& field_name_arg, const std::string& type):
     Field_num(field_name_arg, type) {}
-
+    
 const char* Field_tiny::unpack(const char* from) {
 
     char tmp = *((char*)(from));
-    field_data = tmp;
+    field_data = (types::MY_TINYINT)tmp;
 
     LOG_TRACE(log, "  tiny: " << (int)(tmp) << " // " << pack_length());
 
     return from + pack_length();
 }
 
+Field_tiny_unsigned::Field_tiny_unsigned(const std::string& field_name_arg, const std::string& type):
+    Field_tiny(field_name_arg, type) {}
+
+const char* Field_tiny_unsigned::unpack(const char* from) {
+
+    char tmp = *((char*)(from));
+    field_data = (types::MY_UTINYINT)tmp;
+
+    LOG_TRACE(log, "  utiny: " << (int)(tmp) << " // " << pack_length());
+
+    return from + pack_length();
+}
 
 Field_short::Field_short(const std::string& field_name_arg, const std::string& type):
     Field_num(field_name_arg, type) {}
 
 const char* Field_short::unpack(const char* from) {
-
-    uint16 tmp = uint2korr(from);
+    
+    types::MY_SMALLINT tmp = sint2korr(from);
     field_data = tmp;
-
+    
     LOG_TRACE(log, "  short: " << tmp << " // " << pack_length());
 
     return from + pack_length();
 }
+
+Field_short_unsigned::Field_short_unsigned(const std::string& field_name_arg, const std::string& type):
+    Field_short(field_name_arg, type) {}
+
+const char* Field_short_unsigned::unpack(const char* from)
+{
+    types::MY_USMALLINT tmp = uint2korr(from);
+    field_data = tmp;
+    
+    LOG_TRACE(log, "  ushort: " << tmp << " // " << pack_length());
+    
+    return from + pack_length();
+}
+
 
 Field_medium::Field_medium(const std::string& field_name_arg, const std::string& type):
     Field_num(field_name_arg, type) {}
 
 const char* Field_medium::unpack(const char* from) {
 
-    uint32 tmp = uint3korr(from);
+    types::MY_MEDIUMINT tmp = sint3korr(from);
     field_data = tmp;
-
+    
     LOG_TRACE(log, "  medium: " << tmp << " // " << pack_length());
 
     return from + pack_length();
 }
+
+
+Field_medium_unsigned::Field_medium_unsigned(const std::string& field_name_arg, const std::string& type): 
+    Field_medium(field_name_arg, type) {}
+
+const char* Field_medium_unsigned::unpack(const char* from) 
+{
+    types::MY_UMEDIUMINT tmp = uint3korr(from);
+    field_data = tmp;
+    
+    LOG_TRACE(log, "  umedium: " << tmp << " // " << pack_length());
+
+    return from + pack_length();
+}
+
 
 Field_long::Field_long(const std::string& field_name_arg, const std::string& type):
     Field_num(field_name_arg, type) {}
 
 const char* Field_long::unpack(const char* from) {
 
-    uint32 tmp = uint4korr(from);
+    types::MY_INT tmp = sint4korr(from);
     field_data = tmp;
-
+    
     LOG_TRACE(log, "  long: " << tmp << " // " << pack_length());
 
     return from + pack_length();
 }
+
+Field_long_unsigned::Field_long_unsigned(const std::string& field_name_arg, const std::string& type):
+    Field_long(field_name_arg, type) {} 
+    
+const char* Field_long_unsigned::unpack(const char* from)
+{
+    types::MY_UINT tmp = uint4korr(from);
+    field_data = tmp;
+    
+    LOG_TRACE(log, "  ulong: " << tmp << " // " << pack_length());
+
+    return from + pack_length();
+}
+
 
 Field_longlong::Field_longlong(const std::string& field_name_arg, const std::string& type):
     Field_num(field_name_arg, type) {}
 
 const char* Field_longlong::unpack(const char* from) {
 
-    ulonglong tmp = uint8korr(from);
+    types::MY_BIGINT tmp = sint8korr(from);
     field_data = tmp;
 
     LOG_TRACE(log, "  longlong: " << tmp << " // " << pack_length());
 
     return from + pack_length();
 }
+
+Field_longlong_unsigned::Field_longlong_unsigned(const std::string& field_name_arg, const std::string& type):
+    Field_longlong(field_name_arg, type) {}
+   
+const char* Field_longlong_unsigned::unpack(const char* from) {
+    
+    types::MY_UBIGINT tmp = uint8korr(from);
+    field_data = tmp;
+
+    LOG_TRACE(log, "  ulonglong: " << tmp << " // " << pack_length());
+    
+    return from + pack_length();
+}
+
 
 Field_real::Field_real(const std::string& field_name_arg, const std::string& type):
     Field_num(field_name_arg, type) {}
