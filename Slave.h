@@ -76,11 +76,17 @@ public:
     Slave(const MasterInfo& _master_info) : m_master_info(_master_info), ext_state(empty_ext_state) {}
     Slave(const MasterInfo& _master_info, ExtStateIface &state) : m_master_info(_master_info), ext_state(state) {}
 
-    void setMasterInfo(const MasterInfo& aMasterInfo) { m_master_info = aMasterInfo; }
+    // Makes sense only when get_remote_binlog is not started
+    void setMasterInfo(const MasterInfo& aMasterInfo)
+    {
+        m_master_info = aMasterInfo;
+        ext_state.setMasterLogNamePos(aMasterInfo.master_log_name, aMasterInfo.master_log_pos);
+    }
     const MasterInfo& masterInfo() const { return m_master_info; }
 
     typedef std::pair<std::string, unsigned int> binlog_pos_t;
-    binlog_pos_t getLastBinlog();
+    // Reads current binlog position from database
+    binlog_pos_t getLastBinlog() const;
 
     void setCallback(const std::string& _db_name, const std::string& _tbl_name, callback _callback)
     {
