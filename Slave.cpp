@@ -440,6 +440,7 @@ connected:
                 }
 
                 __conn.connect(true);
+                register_slave_on_master(&mysql);
 
                 goto connected;
             } // len == packet_error
@@ -591,25 +592,20 @@ void Slave::register_slave_on_master(MYSQL* mysql)
 
     unsigned int report_host_len=0, report_user_len=0, report_password_len=0;
 
-    const char * report_host = "0.0.0.0";
-
-    const char* report_user = "begun_slave";
-    const char* report_password = "begun_slave";
-    unsigned int report_port = 0;
     unsigned long rpl_recovery_rank = 0;
 
-    report_host_len= strlen(report_host);
-    report_user_len= strlen(report_user);
-    report_password_len= strlen(report_password);
+    report_host_len= m_reportHost.length();
+    report_user_len= m_reportUser.length();
+    report_password_len= m_reportPassword.length();
 
     LOG_DEBUG(log, "Registering slave on master: m_server_id = " << m_server_id << "...");
 
     int4store(pos, m_server_id);
     pos+= 4;
-    pos= net_store_data(pos, (uchar*)report_host, report_host_len);
-    pos= net_store_data(pos, (uchar*)report_user, report_user_len);
-    pos= net_store_data(pos, (uchar*)report_password, report_password_len);
-    int2store(pos, (unsigned short) report_port);
+    pos= net_store_data(pos, (uchar*)m_reportHost.c_str(), report_host_len);
+    pos= net_store_data(pos, (uchar*)m_reportUser.c_str(), report_user_len);
+    pos= net_store_data(pos, (uchar*)m_reportPassword.c_str(), report_password_len);
+    int2store(pos, (unsigned short) m_reportPort);
     pos+= 2;
     int4store(pos, rpl_recovery_rank);
     pos+= 4;

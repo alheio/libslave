@@ -66,12 +66,22 @@ private:
 
     RelayLogInfo m_rli;
 
+    std::string m_reportHost;
+    std::string m_reportUser;
+    std::string m_reportPassword;
+    unsigned int m_reportPort;
 
     void createDatabaseStructure_(table_order_t& tabs, RelayLogInfo& rli) const;
 
 public:
 
-    Slave() : ext_state(empty_ext_state) {}
+    Slave()
+      : ext_state(empty_ext_state)
+      , m_reportHost("0.0.0.0")
+      , m_reportUser("slave")
+      , m_reportPassword("slave")
+      , m_reportPort(0)
+    {}
     Slave(ExtStateIface &state) : ext_state(state) {}
     Slave(const MasterInfo& _master_info) : m_master_info(_master_info), ext_state(empty_ext_state) {}
     Slave(const MasterInfo& _master_info, ExtStateIface &state) : m_master_info(_master_info), ext_state(state) {}
@@ -130,6 +140,11 @@ public:
     // blocked on reading data from mysql server in the separate thread and you want to stop this thread.
     // You should take care that interruptFlag will return 'true' after connection is closed.
     void close_connection();
+
+    void setReportHost(const std::string& str) { m_reportHost = str; }
+    void setReportUser(const std::string& str) { m_reportUser = str; }
+    void setReportPassword(const std::string& str) { m_reportPassword = str; }
+    void setReportPort(unsigned int port) { m_reportPort = port; }
 
 protected:
 
