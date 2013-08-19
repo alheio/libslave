@@ -17,11 +17,11 @@
 #include <map>
 #include <set>
 
-#include <mysql/my_global.h>
+#include <my_global.h>
 #undef min
 #undef max
 
-#include <mysql/mysql.h>
+#include <mysql.h>
 
 #include "relayloginfo.h"
 #include "slave_log_event.h"

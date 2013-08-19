@@ -16,7 +16,7 @@
 #define __NANOMYSQL_H
 
 #include <boost/bind.hpp>
-#include <mysql/mysql.h>
+#include <mysql.h>
 #include "nanofield.h"
 #include <stdexcept>
 #include <stdio.h>

@@ -21,9 +21,9 @@
 
 #include "nanomysql.h"
 
-#include <mysql/my_global.h>
-#include <mysql/m_ctype.h>
-#include <mysql/sql_common.h>
+#include <my_global.h>
+#include <m_ctype.h>
+#include <sql_common.h>
 
 #define packet_end_data 1
 

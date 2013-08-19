@@ -29,7 +29,7 @@
 #include <memory>
 #include <string.h>
 
-#include <mysql/mysql.h>
+#include <mysql.h>
 
 #include "slave_log_event.h"
 #include "SlaveStats.h"

@@ -16,11 +16,11 @@
 #include <cstdio>
 #include <vector>
 #include <stdexcept>                                                                                                                
-#include <mysql/my_global.h>
+#include <my_global.h>
 #undef min
 #undef max
 
-#include <mysql/m_string.h>
+#include <m_string.h>
 
 #include "dec_util.h"
 #include "field.h"
