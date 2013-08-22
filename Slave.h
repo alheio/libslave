@@ -76,15 +76,42 @@ private:
 public:
 
     Slave()
-      : ext_state(empty_ext_state)
-      , m_reportHost("0.0.0.0")
-      , m_reportUser("slave")
-      , m_reportPassword("slave")
-      , m_reportPort(0)
-    {}
-    Slave(ExtStateIface &state) : ext_state(state) {}
-    Slave(const MasterInfo& _master_info) : m_master_info(_master_info), ext_state(empty_ext_state) {}
-    Slave(const MasterInfo& _master_info, ExtStateIface &state) : m_master_info(_master_info), ext_state(state) {}
+        : ext_state(empty_ext_state)
+        , m_reportHost("0.0.0.0")
+        , m_reportUser("slave")
+        , m_reportPassword("slave")
+        , m_reportPort(0)
+    {
+    }
+    
+    Slave(ExtStateIface &state) 
+        : ext_state(state) 
+        , m_reportHost("0.0.0.0")
+        , m_reportUser("slave")
+        , m_reportPassword("slave")
+        , m_reportPort(0)
+    {
+    }
+    
+    Slave(const MasterInfo& _master_info) 
+        : m_master_info(_master_info)
+        , ext_state(empty_ext_state) 
+        , m_reportHost("0.0.0.0")
+        , m_reportUser("slave")
+        , m_reportPassword("slave")
+        , m_reportPort(0)
+    {
+    }
+        
+    Slave(const MasterInfo& _master_info, ExtStateIface &state)
+        : m_master_info(_master_info)
+        , ext_state(state) 
+        , m_reportHost("0.0.0.0")
+        , m_reportUser("slave")
+        , m_reportPassword("slave")
+        , m_reportPort(0)
+    {
+    }
 
     // Makes sense only when get_remote_binlog is not started
     void setMasterInfo(const MasterInfo& aMasterInfo)
