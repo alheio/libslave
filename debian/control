@@ -1,0 +1,16 @@
+Source: libslave
+Priority: extra
+Section: libs
+Maintainer: alheio <zaharov.sy@gmail.com>
+Build-Depends: debhelper (>= 7.0.50~), cmake, libboost-all-dev, libmysqlclient-dev
+Standards-Version: 1.0.5
+Homepage: https://github.com/vozbu/libslave
+
+Package: libslave-dev
+Section: libdevel
+Architecture: any
+Depends: 
+  ${shlibs:Depends},
+  libboost-all-dev,  libmysqlclient-dev
+Description: mysql replication client dev headers
+ c++ mysql replication client dev headers

@@ -1,0 +1,13 @@
+libslave (1.0.6-1) UNRELEASED; urgency=low
+
+  * warnings removed
+
+ -- alheio <zaharov.sy@gmail.com>  Tue, 22 Jan 2014 17:27:25 +0400
+
+
+
+libslave (1.0.5-1) UNRELEASED; urgency=low
+
+  * Initial release. 
+
+ -- alheio <zaharov.sy@gmail.com>  Tue, 10 Dec 2013 17:39:25 +0400
