@@ -178,7 +178,7 @@ void apply_row_event(slave::RelayLogInfo& rli, const Basic_event_info& bei, cons
 
 
 
-}; //namespace
+} //namespace
 
 
 #endif
