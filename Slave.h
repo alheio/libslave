@@ -45,6 +45,7 @@ public:
 
     typedef std::vector<std::pair<std::string, std::string> > table_order_t;
     typedef std::map<std::pair<std::string, std::string>, callback> callbacks_t;
+    typedef std::map<std::pair<std::string, std::string>, filter> filters_t;
 
 
 private:
@@ -57,9 +58,11 @@ private:
     MasterInfo m_master_info;
     EmptyExtState empty_ext_state;
     ExtStateIface &ext_state;
+    EventStatIface* event_stat = nullptr;
 
     table_order_t m_table_order;
     callbacks_t m_callbacks;
+    filters_t m_filters;
 
     typedef boost::function<void (unsigned int)> xid_callback_t;
     xid_callback_t m_xid_callback;
@@ -78,8 +81,8 @@ public:
     Slave()
         : ext_state(empty_ext_state)
         , m_reportHost("0.0.0.0")
-        , m_reportUser("slave")
-        , m_reportPassword("slave")
+        , m_reportUser("begun_slave")
+        , m_reportPassword("begun_slave")
         , m_reportPort(0)
     {
     }
@@ -87,8 +90,8 @@ public:
     Slave(ExtStateIface &state) 
         : ext_state(state) 
         , m_reportHost("0.0.0.0")
-        , m_reportUser("slave")
-        , m_reportPassword("slave")
+        , m_reportUser("begun_slave")
+        , m_reportPassword("begun_slave")
         , m_reportPort(0)
     {
     }
@@ -97,8 +100,8 @@ public:
         : m_master_info(_master_info)
         , ext_state(empty_ext_state) 
         , m_reportHost("0.0.0.0")
-        , m_reportUser("slave")
-        , m_reportPassword("slave")
+        , m_reportUser("begun_slave")
+        , m_reportPassword("begun_slave")
         , m_reportPort(0)
     {
     }
@@ -107,10 +110,15 @@ public:
         : m_master_info(_master_info)
         , ext_state(state) 
         , m_reportHost("0.0.0.0")
-        , m_reportUser("slave")
-        , m_reportPassword("slave")
+        , m_reportUser("begun_slave")
+        , m_reportPassword("begun_slave")
         , m_reportPort(0)
     {
+    }
+
+    void linkEventStat(EventStatIface* _event_stat)
+    {
+        event_stat = _event_stat;
     }
 
     // Makes sense only when get_remote_binlog is not started
@@ -125,10 +133,13 @@ public:
     // Reads current binlog position from database
     binlog_pos_t getLastBinlog() const;
 
-    void setCallback(const std::string& _db_name, const std::string& _tbl_name, callback _callback)
+    void setCallback(const std::string& _db_name, const std::string& _tbl_name, callback _callback,
+                     EventKind filter = eAll)
     {
-        m_table_order.push_back(std::make_pair(_db_name, _tbl_name));
-        m_callbacks[std::make_pair(_db_name, _tbl_name)] = _callback;
+        const std::pair<std::string, std::string> key = std::make_pair(_db_name, _tbl_name);
+        m_table_order.push_back(key);
+        m_callbacks[key] = _callback;
+        m_filters[key] = filter;
 
         ext_state.initTableCount(_db_name + "." + _tbl_name);
     }
@@ -148,6 +159,7 @@ public:
 
         for (RelayLogInfo::name_to_table_t::iterator i = m_rli.m_table_map.begin(); i != m_rli.m_table_map.end(); ++i) {
             i->second->m_callback = m_callbacks[i->first];
+            i->second->m_filter = m_filters[i->first];
         }
     }
 

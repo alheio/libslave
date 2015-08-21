@@ -199,7 +199,7 @@ inline void check_format_description(const char* buf, unsigned int event_len) {
 }
 
 
-bool read_log_event(const char* buf, uint event_len, Basic_event_info& bei)
+bool read_log_event(const char* buf, uint event_len, Basic_event_info& bei, EventStatIface* event_stat)
 
 {
 
@@ -216,22 +216,40 @@ bool read_log_event(const char* buf, uint event_len, Basic_event_info& bei)
         ::abort();
     }
 
+    if (event_stat)
+        if (bei.type != FORMAT_DESCRIPTION_EVENT && bei.type != ROTATE_EVENT)
+            event_stat->tick(bei.when);
+
     switch (bei.type) {
 
     case FORMAT_DESCRIPTION_EVENT:
 
         check_format_description(buf, event_len);
 
+        if (event_stat)
+            event_stat->tickFormatDescription();
         return true;
         break;
 
     case QUERY_EVENT:
+        if (event_stat)
+            event_stat->tickQuery();
+        return true;
     case ROTATE_EVENT:
+        if (event_stat)
+            event_stat->tickRotate();
+        return true;
     case XID_EVENT:
+        if (event_stat)
+            event_stat->tickXid();
+        return true;
     case WRITE_ROWS_EVENT:
     case UPDATE_ROWS_EVENT:
     case DELETE_ROWS_EVENT:
+        // event_stat->tickModify is called from other place.
+        return true;
     case TABLE_MAP_EVENT:
+        // event_stat->processTableMapEvent is called from other place.
         return true;
         break;
 
@@ -254,11 +272,15 @@ bool read_log_event(const char* buf, uint event_len, Basic_event_info& bei)
     case EXECUTE_LOAD_QUERY_EVENT:
     case INCIDENT_EVENT:
     case HEARTBEAT_LOG_EVENT:
+        if (event_stat)
+            event_stat->tickOther();
         return false;
         break;
 
     default:
         LOG_ERROR( log, "Unknown event code: " << (int) bei.type);
+        if (event_stat)
+            event_stat->tickOther();
         return false;
         break;
     }
@@ -427,10 +449,33 @@ unsigned char* do_update_row(boost::shared_ptr<slave::Table> table,
     return t;
 }
 
+namespace // anonymous
+{
+    inline EventKind eventKind(Log_event_type type)
+    {
+        switch(type)
+        {
+        case WRITE_ROWS_EVENT: return eInsert;
+        case UPDATE_ROWS_EVENT: return eUpdate;
+        case DELETE_ROWS_EVENT: return eDelete;
+        default: throw std::logic_error("is not processable kind");
+        }
+    }
 
-void apply_row_event(slave::RelayLogInfo& rli, const Basic_event_info& bei, const Row_event_info& roi, ExtStateIface &ext_state) {
+    typedef uint64_t time_stamp;
+
+    inline time_stamp now()
+    {
+        timespec ts;
+        clock_gettime(CLOCK_REALTIME, &ts);
+        return ts.tv_sec * 1000000000 + ts.tv_nsec;
+    }
+
+} // namespace anonymous
 
 
+void apply_row_event(slave::RelayLogInfo& rli, const Basic_event_info& bei, const Row_event_info& roi, ExtStateIface &ext_state, EventStatIface* event_stat) {
+    EventKind kind = eventKind(bei.type);
     std::pair<std::string,std::string> key = rli.getTableNameById(roi.m_table_id);
 
     LOG_DEBUG(log, "applyRowEvent(): " << roi.m_table_id << " " << key.first << "." << key.second);
@@ -444,18 +489,34 @@ void apply_row_event(slave::RelayLogInfo& rli, const Basic_event_info& bei, cons
 
         unsigned char* row_start = roi.m_rows_buf;
 
-        while (row_start < roi.m_rows_end &&
-               row_start != NULL) {
+        if (should_process(table->m_filter, kind)) {
+            while (row_start < roi.m_rows_end &&
+                   row_start != NULL) {
+                time_stamp start = now();
+                try
+                {
+                    if (bei.type == UPDATE_ROWS_EVENT) {
 
-            if (bei.type == UPDATE_ROWS_EVENT) {
+                        row_start = do_update_row(table, bei, roi, row_start, ext_state);
 
-                row_start = do_update_row(table, bei, roi, row_start, ext_state);
-
-            } else {
-                row_start = do_writedelete_row(table, bei, roi, row_start, ext_state);
+                    } else {
+                        row_start = do_writedelete_row(table, bei, roi, row_start, ext_state);
+                    }
+                }
+                catch (...)
+                {
+                    if (event_stat)
+                        event_stat->tickModifyFailed(roi.m_table_id, kind, now() - start);
+                    throw;
+                }
+                if (event_stat)
+                    event_stat->tickModifyDone(roi.m_table_id, kind, now() - start);
             }
+            return;
         }
     }
+    if (event_stat)
+        event_stat->tickModifyIgnored(roi.m_table_id, kind);
 }
 
 

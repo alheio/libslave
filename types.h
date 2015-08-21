@@ -2,23 +2,17 @@
 #define __SLAVE_TYPES_H
 
 #include <inttypes.h>
-#include <string.h>
 #include <string>
 #include <time.h>
 
 namespace slave {
 namespace types
 {
-    typedef int32_t             MY_INT;
-    typedef uint32_t            MY_UINT;
-    typedef long long           MY_BIGINT;
-    typedef unsigned long long  MY_UBIGINT;
-    typedef int32_t             MY_MEDIUMINT;
-    typedef uint32_t            MY_UMEDIUMINT;
-    typedef int16_t             MY_SMALLINT;
-    typedef uint16_t            MY_USMALLINT;
+    typedef uint32_t            MY_INT;
+    typedef unsigned long long  MY_BIGINT;
+    typedef uint32_t            MY_MEDIUMINT;
+    typedef uint16_t            MY_SMALLINT;
     typedef char                MY_TINYINT;
-    typedef unsigned char       MY_UTINYINT;
     typedef uint64_t            MY_BIT;
     typedef int                 MY_ENUM;
     typedef unsigned long long  MY_SET;
@@ -28,7 +22,9 @@ namespace types
     typedef uint32_t            MY_TIME;
     typedef unsigned long long  MY_DATETIME;
     typedef uint32_t            MY_TIMESTAMP;
+    typedef std::string         MY_CHAR;
     typedef std::string         MY_VARCHAR;
+    typedef std::string         MY_TINYTEXT;
     typedef std::string         MY_TEXT;
     typedef std::string         MY_BLOB;
 

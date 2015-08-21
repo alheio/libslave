@@ -184,11 +184,9 @@ void Slave::createTable(RelayLogInfo& rli,
                       << " Field type: " << extract_field );
 
         PtrField field;
-        
-        bool bUnsigned = NULL != ::strcasestr(type.c_str(), "unsigned");
 
         if (extract_field == "int")
-            field = bUnsigned ? PtrField(new Field_long_unsigned(name, type)) : PtrField(new Field_long(name, type));
+            field = PtrField(new Field_long(name, type));
 
         else if (extract_field == "double")
             field = PtrField(new Field_double(name, type));
@@ -224,16 +222,16 @@ void Slave::createTable(RelayLogInfo& rli,
             field = PtrField(new Field_varstring(name, type, ci));
 
         else if (extract_field == "tinyint")
-            field = bUnsigned ? PtrField(new Field_tiny_unsigned(name, type)) : PtrField(new Field_tiny(name, type));
+            field = PtrField(new Field_tiny(name, type));
 
         else if (extract_field == "smallint")
-            field = bUnsigned ? PtrField(new Field_short_unsigned(name, type)) : PtrField(new Field_short(name, type));
+            field = PtrField(new Field_short(name, type));
 
         else if (extract_field == "mediumint")
-            field = bUnsigned ? PtrField(new Field_medium_unsigned(name, type)) : PtrField(new Field_medium(name, type));
+            field = PtrField(new Field_medium(name, type));
 
         else if (extract_field == "bigint")
-            field = bUnsigned ? PtrField(new Field_longlong_unsigned(name, type)) : PtrField(new Field_longlong(name, type));
+            field = PtrField(new Field_longlong(name, type));
 
         else if (extract_field == "text")
             field = PtrField(new Field_blob(name, type));
@@ -324,11 +322,11 @@ struct raii_mysql_connector
          */
         mysql_options(mysql, MYSQL_OPT_READ_TIMEOUT, &timeout); //(const char*) slave_net_timeout.c_str());
 
-        bool was_error = false;
+        bool was_error = reconnect;
         while (mysql_real_connect(mysql,
                                   m_master_info.host.c_str(),
                                   m_master_info.user.c_str(),
-                                  m_master_info.password.c_str(), 0, m_master_info.port, 0, 0)
+                                  m_master_info.password.c_str(), 0, m_master_info.port, 0, CLIENT_REMEMBER_OPTIONS)
                == 0) {
 
 
@@ -374,13 +372,13 @@ void Slave::get_remote_binlog( const boost::function< bool() >& _interruptFlag)
 
 connected:
 
-    // Получим позицию бинлога, сохранённую в ext_state ранее, или загрузим её
-    // из persistent хранилища. false в случае, если не удалось получить позицию.
+    // Get binlog position saved in ext_state before, or load it
+    // from persistent storage. Get false if failed to get binlog position.
     if( !ext_state.getMasterInfo(
                 m_master_info.master_log_name,
                 m_master_info.master_log_pos) ) {
-        // Если сохранённой ранее позиции бинлога нет,
-        // получаем последнюю версию бинлога и смещение
+        // If there is not binlog position saved before,
+        // get last binlog name and last binlog position.
         std::pair<std::string,unsigned int> row = getLastBinlog();
 
         m_master_info.master_log_name = row.first;
@@ -421,10 +419,10 @@ connected:
                                   "slave. If the entry is correct, restart the server with a higher value of "
                                   "max_allowed_packet. max_allowed_packet=" << mysql_error(&mysql) );
                         break;
-                    case ER_MASTER_FATAL_ERROR_READING_BINLOG: // Ошибка -- неизвестный бинлог-файл.
+                    case ER_MASTER_FATAL_ERROR_READING_BINLOG: // Error -- unknown binlog file.
                         LOG_ERROR(log, "Myslave: fatal error reading binlog. " <<  mysql_error(&mysql) );
                         break;
-                    case 2013: // Обработка ошибки 'Lost connection to MySQL'
+                    case 2013: // Processing error 'Lost connection to MySQL'
                         LOG_WARNING(log, "Myslave: Error from MySQL: " << mysql_error(&mysql) );
                         // Check if connection closed by user for exiting from the loop
                         if (_interruptFlag())
@@ -440,6 +438,7 @@ connected:
                 }
 
                 __conn.connect(true);
+                
                 register_slave_on_master(&mysql);
 
                 goto connected;
@@ -455,7 +454,8 @@ connected:
 
             if (!slave::read_log_event((const char*) mysql.net.read_pos + 1,
                                        len - 1,
-                                       event)) {
+                                       event,
+                                       event_stat)) {
 
                 LOG_TRACE(log, "Skipping unknown event.");
                 continue;
@@ -590,21 +590,15 @@ void Slave::register_slave_on_master(MYSQL* mysql)
 {
     uchar buf[1024], *pos= buf;
 
-    unsigned int report_host_len=0, report_user_len=0, report_password_len=0;
-
     unsigned long rpl_recovery_rank = 0;
-
-    report_host_len= m_reportHost.length();
-    report_user_len= m_reportUser.length();
-    report_password_len= m_reportPassword.length();
 
     LOG_DEBUG(log, "Registering slave on master: m_server_id = " << m_server_id << "...");
 
     int4store(pos, m_server_id);
     pos+= 4;
-    pos= net_store_data(pos, (uchar*)m_reportHost.c_str(), report_host_len);
-    pos= net_store_data(pos, (uchar*)m_reportUser.c_str(), report_user_len);
-    pos= net_store_data(pos, (uchar*)m_reportPassword.c_str(), report_password_len);
+    pos= net_store_data(pos, (uchar*)m_reportHost.c_str(), (unsigned int)m_reportHost.length());
+    pos= net_store_data(pos, (uchar*)m_reportUser.c_str(), (unsigned int)m_reportUser.length());
+    pos= net_store_data(pos, (uchar*)m_reportPassword.c_str(), (unsigned int)m_reportPassword.length());
     int2store(pos, (unsigned short) m_reportPort);
     pos+= 2;
     int4store(pos, rpl_recovery_rank);
@@ -798,6 +792,8 @@ int Slave::process_event(const slave::Basic_event_info& bei, RelayLogInfo &m_rli
 
         m_rli.setTableName(tmi.m_table_id, tmi.m_tblnam, tmi.m_dbnam);
 
+        if (event_stat)
+            event_stat->processTableMap(tmi.m_table_id, tmi.m_tblnam, tmi.m_dbnam);
         break;
     }
 
@@ -811,7 +807,7 @@ int Slave::process_event(const slave::Basic_event_info& bei, RelayLogInfo &m_rli
 
         Row_event_info roi(bei.buf, bei.event_len, (bei.type == UPDATE_ROWS_EVENT));
 
-        apply_row_event(m_rli, bei, roi, ext_state);
+        apply_row_event(m_rli, bei, roi, ext_state, event_stat);
 
         break;
     }
@@ -929,7 +925,8 @@ Slave::binlog_pos_t Slave::getLastBinlog() const
 
     nanomysql::Connection::result_t res;
 
-    conn.query("SHOW MASTER STATUS");
+    static const std::string query = "SHOW MASTER STATUS";
+    conn.query(query);
     conn.store(res);
 
     if (res.size() == 1 && res[0].size() == 4) {
@@ -937,19 +934,19 @@ Slave::binlog_pos_t Slave::getLastBinlog() const
         std::map<std::string,nanomysql::field>::const_iterator z = res[0].find("File");
 
         if (z == res[0].end())
-            throw std::runtime_error("Slave::create_table(): SHOW SLAVE HOSTS query did not return 'File'");
+            throw std::runtime_error("Slave::create_table(): " + query + " query did not return 'File'");
 
         std::string file = z->second.data;
 
         z = res[0].find("Position");
 
         if (z == res[0].end())
-            throw std::runtime_error("Slave::create_table(): SHOW SLAVE HOSTS query did not return 'Position'");
+            throw std::runtime_error("Slave::create_table(): " + query + " query did not return 'Position'");
 
         std::string pos = z->second.data;
 
         return std::make_pair(file, ::strtoul(pos.c_str(), NULL, 10));
     }
 
-    throw std::runtime_error("Slave::getLastBinLog(): Could not SHOW MASTER STATUS");
+    throw std::runtime_error("Slave::getLastBinLog(): Could not " + query);
 }
