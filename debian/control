@@ -3,7 +3,7 @@ Priority: extra
 Section: libs
 Maintainer: alheio <zaharov.sy@gmail.com>
 Build-Depends: debhelper (>= 7.0.50~), cmake, libboost-all-dev, libmysqlclient-dev
-Standards-Version: 1.0.5
+Standards-Version: 3.7.2
 Homepage: https://github.com/vozbu/libslave
 
 Package: libslave-dev

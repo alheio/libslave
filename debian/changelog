@@ -1,3 +1,55 @@
+libslave (1.0.7-1) UNRELEASED; urgency=low
+
+  [ Valeriy Bykov ]
+  * [*] consistent DefaultExtState
+  * [*] fixed setMasterInfo and EmptyExtState.
+  * [+] tests
+
+  [ alheio ]
+  * cmake + mysql
+  * report host-user-pwd settings
+  * report user-host-pwd
+
+  [ tkatchev ]
+  * Fix for SET fields with more than 32 elements.
+
+  [ Valeriy Bykov ]
+  * [*] using tyoes defined in slave/types.h in tests
+  * [+] tests for SET field
+  * [*] fixed slave_test arguments parsing
+  * [*] fixed unit_test linking
+  * [*] don't build dynamic library if libmysqlclient is static
+  * [*] fixed error message
+  * [+] db_filler
+  * [+] test_client can walk from one binlog position to another and do benchmarks
+
+  [ Victor Luchits ]
+  * Pass CLIENT_REMEMBER_OPTIONS to mysql_real_connect
+
+  [ Valeriy Bykov ]
+  * [*] fixed BIT type value for gcc-4.9.2
+
+  [ Artem Shmelev ]
+  * [+] unit_test: added INSERT/UPDATE/DELETE tests
+  * [+] added event_filters and massive unit_tests improvements
+  * [+] added libslave stats and tests on it
+
+  [ artshmelev ]
+  * [*] translate rest of comments into English
+
+  [ Valeriy Bykov ]
+  * [!] documentation is updated
+
+  [ Zakharov Sergey ]
+  * debian
+
+  [ Artem Shmelev ]
+  * [*] fixed libslave stats
+
+  [ sz ]
+
+ -- alheio <zaharov.sy@gmail.com>  Fri, 21 Aug 2015 18:48:51 +0300
+
 libslave (1.0.6-1) UNRELEASED; urgency=low
 
   * warnings removed
