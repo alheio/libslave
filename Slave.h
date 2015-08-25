@@ -58,7 +58,7 @@ private:
     MasterInfo m_master_info;
     EmptyExtState empty_ext_state;
     ExtStateIface &ext_state;
-    EventStatIface* event_stat = nullptr;
+    EventStatIface* event_stat;
 
     table_order_t m_table_order;
     callbacks_t m_callbacks;
@@ -78,43 +78,10 @@ private:
 
 public:
 
-    Slave()
-        : ext_state(empty_ext_state)
-        , m_reportHost("0.0.0.0")
-        , m_reportUser("begun_slave")
-        , m_reportPassword("begun_slave")
-        , m_reportPort(0)
-    {
-    }
-    
-    Slave(ExtStateIface &state) 
-        : ext_state(state) 
-        , m_reportHost("0.0.0.0")
-        , m_reportUser("begun_slave")
-        , m_reportPassword("begun_slave")
-        , m_reportPort(0)
-    {
-    }
-    
-    Slave(const MasterInfo& _master_info) 
-        : m_master_info(_master_info)
-        , ext_state(empty_ext_state) 
-        , m_reportHost("0.0.0.0")
-        , m_reportUser("begun_slave")
-        , m_reportPassword("begun_slave")
-        , m_reportPort(0)
-    {
-    }
-        
-    Slave(const MasterInfo& _master_info, ExtStateIface &state)
-        : m_master_info(_master_info)
-        , ext_state(state) 
-        , m_reportHost("0.0.0.0")
-        , m_reportUser("begun_slave")
-        , m_reportPassword("begun_slave")
-        , m_reportPort(0)
-    {
-    }
+    Slave();
+    Slave(ExtStateIface &state);
+    Slave(const MasterInfo& _master_info);
+    Slave(const MasterInfo& _master_info, ExtStateIface &state);
 
     void linkEventStat(EventStatIface* _event_stat)
     {

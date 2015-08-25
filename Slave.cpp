@@ -58,6 +58,48 @@ unsigned char *net_store_data(unsigned char *to, const unsigned char *from, unsi
 
 using namespace slave;
 
+Slave::Slave()
+    : ext_state(empty_ext_state)
+    , event_stat(nullptr)
+    , m_reportHost("0.0.0.0")
+    , m_reportUser("begun_slave")
+    , m_reportPassword("begun_slave")
+    , m_reportPort(0)
+{
+}
+
+Slave::Slave(ExtStateIface &state) 
+    : ext_state(state) 
+    , event_stat(nullptr)
+    , m_reportHost("0.0.0.0")
+    , m_reportUser("begun_slave")
+    , m_reportPassword("begun_slave")
+    , m_reportPort(0)
+{
+}
+
+Slave::Slave(const MasterInfo& _master_info) 
+    : m_master_info(_master_info)
+    , ext_state(empty_ext_state)
+    , event_stat(nullptr)
+    , m_reportHost("0.0.0.0")
+    , m_reportUser("begun_slave")
+    , m_reportPassword("begun_slave")
+    , m_reportPort(0)
+{
+}
+	
+Slave::Slave(const MasterInfo& _master_info, ExtStateIface &state)
+    : m_master_info(_master_info)
+    , ext_state(state)
+    , event_stat(nullptr)
+    , m_reportHost("0.0.0.0")
+    , m_reportUser("begun_slave")
+    , m_reportPassword("begun_slave")
+    , m_reportPort(0)
+{
+}
+
 
 void Slave::init()
 {

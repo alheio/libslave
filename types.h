@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include <string>
+#include <string.h> // ::memset()
 #include <time.h>
 
 namespace slave {

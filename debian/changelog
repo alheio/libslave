@@ -1,3 +1,10 @@
+libslave (1.0.8-1) UNRELEASED; urgency=low
+
+  * fixed gcc 4.7.2 compilation errors
+  * Slave.h can be included into projects without c++11 support
+
+ -- Zakharov Sergey <zaharov.sy@gmail.com>  Tue, 25 Aug 2015 13:06:07 +0300
+
 libslave (1.0.7-1) UNRELEASED; urgency=low
 
   [ Valeriy Bykov ]

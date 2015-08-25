@@ -578,7 +578,7 @@ namespace // anonymous
         template<typename T>
         void checkUpdate(Line<T> was, Line<T> now)
         {
-            check<T>([&was, &now](const Collector<T>& collector)
+            check<T>([this, &was, &now](const Collector<T>& collector)
                      { collector.checkUpdate(was.expected, now.expected, errorMessage(now)); },
                      "UPDATE test SET value=" + now.insert, errorMessage(now), slave::eUpdate);
         }
