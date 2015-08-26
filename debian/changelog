@@ -1,7 +1,9 @@
 libslave (1.1.0-1) UNRELEASED; urgency=low
 
   [ Egorov Anton <github.com/dohxehapo> ]
-  * MYSQL 5.6.x support (without handling checksum algorithms)
+  * MYSQL 5.6.x support ()
+
+ -- Zakharov Sergey  <zaharov.sy@gmail.com>  Wed, 26 Aug 2015 22:00:00 +0300
 
 libslave (1.0.8-1) UNRELEASED; urgency=low
 
