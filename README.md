@@ -43,8 +43,8 @@ For building the library, you will need:
 
 Usage requirements
 -------------------------------------------------------------------
- * Requires >= Mysql 5.1.23 and < Mysql 5.6.0. Tested only with some of the 5.1 and 5.5
-   versions of mysql servers.
+ * Requires >= Mysql 5.1.23 and < Mysql 5.7.0. Tested only with some of the 5.1,
+   5.5 and 5.6 versions of mysql servers.
 
 Compiling
 -------------------------------------------------------------------
