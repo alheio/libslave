@@ -57,13 +57,27 @@ enum Log_event_type
   PRE_GA_UPDATE_ROWS_EVENT = 21,
   PRE_GA_DELETE_ROWS_EVENT = 22,
 
-  WRITE_ROWS_EVENT = 23,
-  UPDATE_ROWS_EVENT = 24,
-  DELETE_ROWS_EVENT = 25,
+  WRITE_ROWS_EVENT_V1 = 23,
+  UPDATE_ROWS_EVENT_V1 = 24,
+  DELETE_ROWS_EVENT_V1 = 25,
 
   INCIDENT_EVENT = 26,
 
   HEARTBEAT_LOG_EVENT= 27,
+
+  // 5.6.x new events
+
+  IGNORABLE_LOG_EVENT      = 28,
+  ROWS_QUERY_LOG_EVENT     = 29,
+
+  WRITE_ROWS_EVENT_V2      = 30,
+  UPDATE_ROWS_EVENT_V2     = 31,
+  DELETE_ROWS_EVENT_V2     = 32,
+
+  GTID_LOG_EVENT           = 33,
+  ANONYMOUS_GTID_LOG_EVENT = 34,
+
+  PREVIOUS_GTIDS_LOG_EVENT = 35,
 
   ENUM_END_EVENT
 };
@@ -71,27 +85,27 @@ enum Log_event_type
 #define LOG_EVENT_TYPES (ENUM_END_EVENT-1)
 
 
-#define EVENT_TYPE_OFFSET    4
-#define SERVER_ID_OFFSET     5
-#define EVENT_LEN_OFFSET     9
-#define LOG_POS_OFFSET       13
+#define EVENT_TYPE_OFFSET        4
+#define SERVER_ID_OFFSET         5
+#define EVENT_LEN_OFFSET         9
+#define LOG_POS_OFFSET           13
 
-#define LOG_EVENT_HEADER_LEN 19
+#define LOG_EVENT_HEADER_LEN     19
 
-#define ROTATE_HEADER_LEN    8
-#define R_POS_OFFSET       0
+#define ROTATE_HEADER_LEN        8
+#define R_POS_OFFSET             0
 
-#define QUERY_HEADER_MINIMAL_LEN     (4 + 4 + 1 + 2)
-#define QUERY_HEADER_LEN     (QUERY_HEADER_MINIMAL_LEN + 2)
+#define QUERY_HEADER_MINIMAL_LEN (4 + 4 + 1 + 2)
+#define QUERY_HEADER_LEN         (QUERY_HEADER_MINIMAL_LEN + 2)
 #define Q_STATUS_VARS_LEN_OFFSET 11
-#define Q_DB_LEN_OFFSET             8
+#define Q_DB_LEN_OFFSET          8
 
-#define TABLE_MAP_HEADER_LEN   8
-#define TM_MAPID_OFFSET    0
+#define TABLE_MAP_HEADER_LEN     8
+#define TM_MAPID_OFFSET          0
 
-#define ROWS_HEADER_LEN        8
-#define RW_MAPID_OFFSET    0
-#define ROWS_HEADER_LEN        8
+#define ROWS_HEADER_LEN_V1       8
+#define RW_MAPID_OFFSET          0
+#define ROWS_HEADER_LEN_V2       10
 
 #define LOG_EVENT_MINIMAL_HEADER_LEN 19
 
@@ -103,6 +117,25 @@ enum Log_event_type
 #define ST_COMMON_HEADER_LEN_OFFSET (ST_CREATED_OFFSET + 4)
 
 #define START_V3_HEADER_LEN     (2 + ST_SERVER_VER_LEN + 4)
+
+
+// binlog_checksum stuff (new in 5.6.x)
+
+enum enum_binlog_checksum_alg {
+    BINLOG_CHECKSUM_ALG_OFF      = 0,   // Events are without checksum though its generator
+                                        // is checksum-capable New Master (NM).
+    BINLOG_CHECKSUM_ALG_CRC32    = 1,   // CRC32 of zlib algorithm.
+    BINLOG_CHECKSUM_ALG_ENUM_END,       // the cut line: valid arg range is [1, 0x7f].
+    BINLOG_CHECKSUM_ALG_UNDEF    = 255, // special value to tag undetemined yet checksum
+                                        // or events from checksum-unaware servers
+};
+
+#define CHECKSUM_CRC32_SIGNATURE_LEN    4
+/**
+    defined statically while there is just one alg implemented
+*/
+#define BINLOG_CHECKSUM_LEN             CHECKSUM_CRC32_SIGNATURE_LEN
+#define BINLOG_CHECKSUM_ALG_DESC_LEN    1   /* 1 byte checksum alg descriptor */
 
 
 //-----------------------------------------------------------------------------------------
@@ -161,11 +194,13 @@ struct Row_event_info {
 
     bool has_after_image;
 
-    Row_event_info(const char* buf, unsigned int event_len, bool do_update);
+    Row_event_info(const char* buf, unsigned int event_len,
+                   bool do_update, bool is_master_5_6_x);
 };
 
 
-bool read_log_event(const char* buf, unsigned int event_len, Basic_event_info& info, EventStatIface* event_stat);
+bool read_log_event(const char* buf, unsigned int event_len, Basic_event_info& info,
+                    EventStatIface* event_stat, bool is_master_5_6_x);
 
 void apply_row_event(slave::RelayLogInfo& rli, const Basic_event_info& bei, const Row_event_info& roi, ExtStateIface &ext_state, EventStatIface* event_stat);
 

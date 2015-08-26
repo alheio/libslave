@@ -55,6 +55,10 @@ private:
 
     int m_server_id;
 
+    static const int m_master_version_min = 50123;   // 5.1.23
+    static const int m_master_version_5_6_x = 50600; // 5.6.00
+    int m_master_version;
+
     MasterInfo m_master_info;
     EmptyExtState empty_ext_state;
     ExtStateIface &ext_state;
@@ -141,6 +145,7 @@ public:
     void init();
 
     int serverId() const { return m_server_id; }
+    bool is_master_5_6_x() const { return (m_master_version > m_master_version_5_6_x); }
 
     // Closes connection, opened in get_remotee_binlog. Should be called if your have get_remote_binlog
     // blocked on reading data from mysql server in the separate thread and you want to stop this thread.

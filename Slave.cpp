@@ -497,8 +497,9 @@ connected:
             if (!slave::read_log_event((const char*) mysql.net.read_pos + 1,
                                        len - 1,
                                        event,
-                                       event_stat)) {
-
+                                       event_stat,
+                                       is_master_5_6_x()))
+            {
                 LOG_TRACE(log, "Skipping unknown event.");
                 continue;
             }
@@ -683,9 +684,8 @@ void Slave::check_master_version()
         int major, minor, patch;
         if (3 == sscanf(tmp.c_str(), "%d.%d.%d", &major, &minor, &patch))
         {
-            const int version = major * 10000 + minor * 100 + patch;
-            static const int min_version = 50123;   // 5.1.23
-            if (version >= min_version)
+            m_master_version = major * 10000 + minor * 100 + patch;
+            if (m_master_version >= m_master_version_min)
                 return;
         }
         throw std::runtime_error("Slave::check_master_version(): got invalid version: " + tmp);
@@ -839,15 +839,22 @@ int Slave::process_event(const slave::Basic_event_info& bei, RelayLogInfo &m_rli
         break;
     }
 
-    case WRITE_ROWS_EVENT:
-    case UPDATE_ROWS_EVENT:
-    case DELETE_ROWS_EVENT:
+    case WRITE_ROWS_EVENT_V1:
+    case WRITE_ROWS_EVENT_V2:
+    case UPDATE_ROWS_EVENT_V1:
+    case UPDATE_ROWS_EVENT_V2:
+    case DELETE_ROWS_EVENT_V1:
+    case DELETE_ROWS_EVENT_V2:
     {
-        LOG_TRACE(log, "Got " << (bei.type == WRITE_ROWS_EVENT ? "WRITE" :
-                                  bei.type == DELETE_ROWS_EVENT ? "DELETE" :
-                                  "UPDATE") << "_ROWS_EVENT");
+        LOG_TRACE(log, "Got " <<
+                  ((bei.type == WRITE_ROWS_EVENT_V1 || bei.type == WRITE_ROWS_EVENT_V2) ?
+                  "WRITE" :
+                  (bei.type == DELETE_ROWS_EVENT_V1 || bei.type == WRITE_ROWS_EVENT_V2) ?
+                  "DELETE" : "UPDATE") << "_ROWS_EVENT");
 
-        Row_event_info roi(bei.buf, bei.event_len, (bei.type == UPDATE_ROWS_EVENT));
+        Row_event_info roi(bei.buf, bei.event_len,
+                           (bei.type == UPDATE_ROWS_EVENT_V1 || bei.type == UPDATE_ROWS_EVENT_V2),
+                           is_master_5_6_x());
 
         apply_row_event(m_rli, bei, roi, ext_state, event_stat);
 
@@ -971,8 +978,9 @@ Slave::binlog_pos_t Slave::getLastBinlog() const
     conn.query(query);
     conn.store(res);
 
-    if (res.size() == 1 && res[0].size() == 4) {
-
+    const unsigned int fieldCount = is_master_5_6_x() ? 5 : 4;
+    if (res.size() == 1 && res[0].size() == fieldCount)
+    {
         std::map<std::string,nanomysql::field>::const_iterator z = res[0].find("File");
 
         if (z == res[0].end())
