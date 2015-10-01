@@ -44,7 +44,8 @@ For building the library, you will need:
 Usage requirements
 -------------------------------------------------------------------
  * Requires >= Mysql 5.1.23 and < Mysql 5.7.0. Tested only with some of the 5.1,
-   5.5 and 5.6 versions of mysql servers.
+   5.5 and 5.6 versions of mysql servers. Libslave is not handling any checksum algorithms (implemented in 
+   MYSQL 5.6.x), so servers must have something like "binlog_checksum=NONE"
 
 Compiling
 -------------------------------------------------------------------
