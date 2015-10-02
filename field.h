@@ -141,7 +141,11 @@ public:
 };
 
 class Field_timestamp: public Field_str {
-    unsigned int pack_length() const { return 4; }
+
+    // Timestamp field length in bytes
+    unsigned int length_bytes;
+
+    unsigned int pack_length() const { return length_bytes; }
 public:
     Field_timestamp(const std::string& field_name_arg, const std::string& type);
 
@@ -162,7 +166,11 @@ public:
 };
 
 class Field_time: public Field_str {
-    unsigned int pack_length() const { return 3; }
+
+    // Time field length in bytes
+    unsigned int length_bytes;
+
+    unsigned int pack_length() const { return length_bytes; }
 public:
 
     Field_time(const std::string& field_name_arg, const std::string& type);
@@ -171,7 +179,11 @@ public:
 };
 
 class Field_datetime: public Field_str {
-    unsigned int pack_length() const { return 8; }
+
+    // DateTime field length in bytes
+    unsigned int length_bytes;
+
+    unsigned int pack_length() const { return length_bytes; }
 public:
     Field_datetime(const std::string& field_name_arg, const std::string& type);
 
