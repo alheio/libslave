@@ -68,8 +68,8 @@ Slave::Slave()
 {
 }
 
-Slave::Slave(ExtStateIface &state) 
-    : ext_state(state) 
+Slave::Slave(ExtStateIface &state)
+    : ext_state(state)
     , event_stat(nullptr)
     , m_reportHost("0.0.0.0")
     , m_reportUser("begun_slave")
@@ -78,7 +78,7 @@ Slave::Slave(ExtStateIface &state)
 {
 }
 
-Slave::Slave(const MasterInfo& _master_info) 
+Slave::Slave(const MasterInfo& _master_info)
     : m_master_info(_master_info)
     , ext_state(empty_ext_state)
     , event_stat(nullptr)
@@ -88,7 +88,7 @@ Slave::Slave(const MasterInfo& _master_info)
     , m_reportPort(0)
 {
 }
-	
+
 Slave::Slave(const MasterInfo& _master_info, ExtStateIface &state)
     : m_master_info(_master_info)
     , ext_state(state)
@@ -236,20 +236,11 @@ void Slave::createTable(RelayLogInfo& rli,
         else if (extract_field == "float")
             field = PtrField(new Field_float(name, type));
 
-        else if (extract_field == "timestamp")
-            field = PtrField(new Field_timestamp(name, type));
-
-        else if (extract_field == "datetime")
-            field = PtrField(new Field_datetime(name, type));
-
         else if (extract_field == "date")
             field = PtrField(new Field_date(name, type));
 
         else if (extract_field == "year")
             field = PtrField(new Field_year(name, type));
-
-        else if (extract_field == "time")
-            field = PtrField(new Field_time(name, type));
 
         else if (extract_field == "enum")
             field = PtrField(new Field_enum(name, type));
@@ -304,6 +295,35 @@ void Slave::createTable(RelayLogInfo& rli,
 
         else if (extract_field == "bit")
             field = PtrField(new Field_bit(name, type));
+
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+        // Temporal types that have been changed in the MySql 5.6.4
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+        else if (extract_field == "time")
+        {
+            if (!is_master_5_6_x())
+                field = PtrField(new Field_time_5_5(name, type));
+            else
+                field = PtrField(new Field_time_5_6(name, type));
+        }
+
+        else if (extract_field == "timestamp")
+        {
+            if (!is_master_5_6_x())
+                field = PtrField(new Field_timestamp_5_5(name, type));
+            else
+                field = PtrField(new Field_timestamp_5_6(name, type));
+        }
+
+        else if (extract_field == "datetime")
+        {
+            if (!is_master_5_6_x())
+                field = PtrField(new Field_datetime_5_5(name, type));
+            else
+                field = PtrField(new Field_datetime_5_6(name, type));
+        }
+
 
         else {
             LOG_ERROR(log, "createTable: class name don't exist: " << extract_field );
@@ -480,7 +500,7 @@ connected:
                 }
 
                 __conn.connect(true);
-                
+
                 register_slave_on_master(&mysql);
 
                 goto connected;

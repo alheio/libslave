@@ -140,18 +140,6 @@ public:
     const char* unpack(const char* from);
 };
 
-class Field_timestamp: public Field_str {
-
-    // Timestamp field length in bytes
-    unsigned int length_bytes;
-
-    unsigned int pack_length() const { return length_bytes; }
-public:
-    Field_timestamp(const std::string& field_name_arg, const std::string& type);
-
-    const char* unpack(const char* from);
-};
-
 class Field_year: public Field_tiny {
 public:
     Field_year(const std::string& field_name_arg, const std::string& type);
@@ -165,31 +153,6 @@ public:
     const char* unpack(const char* from);
 };
 
-class Field_time: public Field_str {
-
-    // Time field length in bytes
-    unsigned int length_bytes;
-
-    unsigned int pack_length() const { return length_bytes; }
-public:
-
-    Field_time(const std::string& field_name_arg, const std::string& type);
-
-    const char* unpack(const char* from);
-};
-
-class Field_datetime: public Field_str {
-
-    // DateTime field length in bytes
-    unsigned int length_bytes;
-
-    unsigned int pack_length() const { return length_bytes; }
-public:
-    Field_datetime(const std::string& field_name_arg, const std::string& type);
-
-    const char* unpack(const char* from);
-};
-
 class Field_varstring: public Field_longstr {
 
     // How many bytes are needed for holding the length
@@ -198,9 +161,9 @@ class Field_varstring: public Field_longstr {
     unsigned int pack_length() const { return (unsigned int) field_length+length_bytes; }
 
 public:
-    Field_varstring(const std::string& field_name_arg, const std::string& type, 
+    Field_varstring(const std::string& field_name_arg, const std::string& type,
                     const collate_info& collate);
-	
+
     const char* unpack(const char* from);
 };
 
@@ -247,7 +210,7 @@ protected:
     unsigned int packlength;
 
     // Number of elements in enum
-    unsigned short count_elements;	
+    unsigned short count_elements;
 };
 
 class Field_set: public Field_enum {
@@ -285,6 +248,91 @@ public:
     unsigned int pack_length() const {
         return _pack_length;
     }
+};
+
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// Temporal types that have been changed in the MySql 5.6.4
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+
+class Field_time_5_5: public Field_str {
+
+    // Time field length in bytes
+    unsigned int length_bytes;
+
+    unsigned int pack_length() const { return length_bytes; }
+public:
+
+    Field_time_5_5(const std::string& field_name_arg, const std::string& type);
+
+    const char* unpack(const char* from);
+};
+
+
+class Field_time_5_6: public Field_str {
+
+    // Time field length in bytes
+    unsigned int length_bytes;
+
+    unsigned int pack_length() const { return length_bytes; }
+public:
+
+    Field_time_5_6(const std::string& field_name_arg, const std::string& type);
+
+    const char* unpack(const char* from);
+};
+
+
+class Field_timestamp_5_5: public Field_str {
+
+    // Timestamp field length in bytes
+    unsigned int length_bytes;
+
+    unsigned int pack_length() const { return length_bytes; }
+public:
+    Field_timestamp_5_5(const std::string& field_name_arg, const std::string& type);
+
+    const char* unpack(const char* from);
+};
+
+
+class Field_timestamp_5_6: public Field_str {
+
+    // Timestamp field length in bytes
+    unsigned int length_bytes;
+
+    unsigned int pack_length() const { return length_bytes; }
+public:
+    Field_timestamp_5_6(const std::string& field_name_arg, const std::string& type);
+
+    const char* unpack(const char* from);
+};
+
+
+class Field_datetime_5_5: public Field_str {
+
+    // DateTime field length in bytes
+    unsigned int length_bytes;
+
+    unsigned int pack_length() const { return length_bytes; }
+public:
+    Field_datetime_5_5(const std::string& field_name_arg, const std::string& type);
+
+    const char* unpack(const char* from);
+};
+
+
+class Field_datetime_5_6: public Field_str {
+
+    // DateTime field length in bytes
+    unsigned int length_bytes;
+
+    unsigned int pack_length() const { return length_bytes; }
+public:
+    Field_datetime_5_6(const std::string& field_name_arg, const std::string& type);
+
+    const char* unpack(const char* from);
 };
 
 

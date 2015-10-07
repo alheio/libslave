@@ -139,136 +139,8 @@ const char* Field_float::unpack(const char* from) {
 Field_str::Field_str(const std::string& field_name_arg, const std::string& type):
     Field(field_name_arg, type) {}
 
-Field_timestamp::Field_timestamp(const std::string& field_name_arg, const std::string& type):
-    Field_str(field_name_arg, type)
-{
-    // Parsing FSP (Fractional Seconds Precision) to find out length in bytes
-
-    int digits = 0;
-    sscanf(type.c_str(), "timestamp(%d)", &digits); // In case of just "timestamp" digits should still be 0
-
-    switch (digits)
-    {
-        case 0:
-            length_bytes = 4;
-            break;
-        case 1:
-        case 2:
-            length_bytes = 5;
-            break;
-        case 3:
-        case 4:
-            length_bytes = 6;
-            break;
-        case 5:
-        case 6:
-            length_bytes = 7;
-            break;
-        default:
-            LOG_ERROR(log, "Field_timestamp: Unrecognized Fractional Seconds Precision in field \'" <<
-                      field_name_arg << "\': \'" << type << "\'.");
-            // It's better to throw an exception to avoid segmfault
-            throw std::runtime_error("Field_timestamp: Unrecognized Fractional Seconds Precision in field \'" +
-                                     field_name_arg + "\': \'" + type + "\'.");
-            break;
-    }
-}
-
-const char* Field_timestamp::unpack(const char* from) {
-
-    // Was before MySQL 5.6.4
-    //uint32 tmp = uint4korr(from);
-
-    ulonglong tmp;
-    switch (pack_length())
-    {
-    case 4:
-        tmp = uint4korr(from);
-        break;
-    case 5:
-        tmp = uint5korr(from);
-        break;
-    case 6:
-        tmp = uint6korr(from);
-        break;
-    case 7:
-        tmp = uint7korr(from);
-        break;
-    }
-
-    field_data = tmp;
-
-    LOG_TRACE(log, "  timestamp: " << tmp << " // " << pack_length());
-
-    return from + pack_length();
-}
-
 Field_year::Field_year(const std::string& field_name_arg, const std::string& type):
     Field_tiny(field_name_arg, type) {}
-
-Field_datetime::Field_datetime(const std::string& field_name_arg, const std::string& type):
-    Field_str(field_name_arg, type)
-{
-    // Parsing FSP (Fractional Seconds Precision) to find out length in bytes
-
-    int digits = 0;
-    sscanf(type.c_str(), "datetime(%d)", &digits); // In case of just "datetime" digits should still be 0
-
-    switch (digits)
-    {
-        case 0:
-            length_bytes = 5;
-            break;
-        case 1:
-        case 2:
-            length_bytes = 6;
-            break;
-        case 3:
-        case 4:
-            length_bytes = 7;
-            break;
-        case 5:
-        case 6:
-            length_bytes = 8;
-            break;
-        default:
-            LOG_ERROR(log, "Field_datetime: Unrecognized Fractional Seconds Precision in field \'" <<
-                      field_name_arg << "\': \'" << type << "\'.");
-            // It's better to throw an exception to avoid segmfault
-            throw std::runtime_error("Field_datetime: Unrecognized Fractional Seconds Precision in field \'" +
-                                     field_name_arg + "\': \'" + type + "\'.");
-            break;
-    }
-}
-
-const char* Field_datetime::unpack(const char* from) {
-
-    // Was before MySQL 5.6.4
-    //ulonglong tmp = uint8korr(from);
-
-    ulonglong tmp;
-    switch (pack_length())
-    {
-    case 5:
-        tmp = uint5korr(from);
-        break;
-    case 6:
-        tmp = uint6korr(from);
-        break;
-    case 7:
-        tmp = uint7korr(from);
-        break;
-    case 8:
-        tmp = uint8korr(from);
-        break;
-    }
-
-    field_data = tmp;
-
-    LOG_TRACE(log, "  datetime: " << tmp << " // " << pack_length());
-
-    return from + pack_length();
-}
 
 Field_date::Field_date(const std::string& field_name_arg, const std::string& type):
     Field_str(field_name_arg, type) {}
@@ -279,70 +151,6 @@ const char* Field_date::unpack(const char* from) {
     field_data = tmp;
 
     LOG_TRACE(log, "  date: " << tmp << " // " << pack_length());
-
-    return from + pack_length();
-}
-
-Field_time::Field_time(const std::string& field_name_arg, const std::string& type):
-    Field_str(field_name_arg, type)
-{
-    // Parsing FSP (Fractional Seconds Precision) to find out length in bytes
-
-    int digits = 0;
-    sscanf(type.c_str(), "time(%d)", &digits); // In case of just "time" digits should still be 0
-
-    switch (digits)
-    {
-        case 0:
-            length_bytes = 3;
-            break;
-        case 1:
-        case 2:
-            length_bytes = 4;
-            break;
-        case 3:
-        case 4:
-            length_bytes = 5;
-            break;
-        case 5:
-        case 6:
-            length_bytes = 6;
-            break;
-        default:
-            LOG_ERROR(log, "Field_time: Unrecognized Fractional Seconds Precision in field \'" <<
-                      field_name_arg << "\': \'" << type << "\'.");
-            // It's better to throw an exception to avoid segmfault
-            throw std::runtime_error("Field_time: Unrecognized Fractional Seconds Precision in field \'" +
-                                     field_name_arg + "\': \'" + type + "\'.");
-            break;
-    }
-}
-
-const char* Field_time::unpack(const char* from) {
-
-    // Was before MySQL 5.6.4
-    //uint32 tmp = uint3korr(from);
-
-    ulonglong tmp;
-    switch (pack_length())
-    {
-    case 3:
-        tmp = uint3korr(from);
-        break;
-    case 4:
-        tmp = uint4korr(from);
-        break;
-    case 5:
-        tmp = uint5korr(from);
-        break;
-    case 6:
-        tmp = uint6korr(from);
-        break;
-    }
-
-    field_data = tmp;
-
-    LOG_TRACE(log, "  time: " << tmp << " // " << pack_length());
 
     return from + pack_length();
 }
@@ -629,5 +437,262 @@ const char* Field_bit::unpack(const char *from)
 
     return from + _pack_length;
 }
+
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// Temporal types that have been changed in the MySql 5.6.4
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+
+// -=-=-=-=-=-=-=-=-=-=-=-
+// Time
+// -=-=-=-=-=-=-=-=-=-=-=-
+
+
+Field_time_5_5::Field_time_5_5(const std::string& field_name_arg, const std::string& type):
+    Field_str(field_name_arg, type)
+{
+    length_bytes = 3;
+}
+
+const char* Field_time_5_5::unpack(const char* from) {
+
+    uint32 tmp = uint3korr(from);
+    field_data = tmp;
+
+    LOG_TRACE(log, "  time: " << tmp << " // " << pack_length());
+
+    return from + pack_length();
+}
+
+
+Field_time_5_6::Field_time_5_6(const std::string& field_name_arg, const std::string& type):
+    Field_str(field_name_arg, type)
+{
+    // Parsing FSP (Fractional Seconds Precision) to find out length in bytes
+
+    int digits = 0;
+    sscanf(type.c_str(), "time(%d)", &digits); // In case of just "time" digits should still be 0
+
+    switch (digits)
+    {
+        case 0:
+            length_bytes = 3;
+            break;
+        case 1:
+        case 2:
+            length_bytes = 4;
+            break;
+        case 3:
+        case 4:
+            length_bytes = 5;
+            break;
+        case 5:
+        case 6:
+            length_bytes = 6;
+            break;
+        default:
+            LOG_ERROR(log, "Field_time: Unrecognized Fractional Seconds Precision in field \'" <<
+                      field_name_arg << "\': \'" << type << "\'.");
+            // It's better to throw an exception to avoid segmfault
+            throw std::runtime_error("Field_time: Unrecognized Fractional Seconds Precision in field \'" +
+                                     field_name_arg + "\': \'" + type + "\'.");
+            break;
+    }
+}
+
+const char* Field_time_5_6::unpack(const char* from) {
+
+    // Was before MySQL 5.6.4
+    //uint32 tmp = uint3korr(from);
+
+    ulonglong buf = 0;
+
+    // Reverse byte order
+    for (unsigned int i = 0; i < pack_length(); ++i)
+        *((unsigned char *)&buf + pack_length() - 1 - i) = *(from + i);
+
+    // Ignoring fractional part
+
+    uint32 tmp = 0;
+    tmp += (buf >> (pack_length() * 8 - 24)) % (1 << 6) * 1;      // Seconds
+    tmp += (buf >> (pack_length() * 8 - 18)) % (1 << 6) * 100;    // Minutes
+    tmp += (buf >> (pack_length() * 8 - 12)) % (1 << 10) * 10000; // Hours
+
+    field_data = tmp;
+
+    LOG_TRACE(log, "  time: " << tmp << " // " << pack_length());
+
+    return from + pack_length();
+}
+
+
+// -=-=-=-=-=-=-=-=-=-=-=-
+// Timestamp
+// -=-=-=-=-=-=-=-=-=-=-=-
+
+
+Field_timestamp_5_5::Field_timestamp_5_5(const std::string& field_name_arg, const std::string& type):
+    Field_str(field_name_arg, type)
+{
+    length_bytes = 4;
+}
+
+const char* Field_timestamp_5_5::unpack(const char* from) {
+
+    uint32 tmp = uint4korr(from);
+    field_data = tmp;
+
+    LOG_TRACE(log, "  timestamp: " << tmp << " // " << pack_length());
+
+    return from + pack_length();
+}
+
+
+Field_timestamp_5_6::Field_timestamp_5_6(const std::string& field_name_arg, const std::string& type):
+    Field_str(field_name_arg, type)
+{
+    // Parsing FSP (Fractional Seconds Precision) to find out length in bytes
+
+    int digits = 0;
+    sscanf(type.c_str(), "timestamp(%d)", &digits); // In case of just "timestamp" digits should still be 0
+
+    switch (digits)
+    {
+        case 0:
+            length_bytes = 4;
+            break;
+        case 1:
+        case 2:
+            length_bytes = 5;
+            break;
+        case 3:
+        case 4:
+            length_bytes = 6;
+            break;
+        case 5:
+        case 6:
+            length_bytes = 7;
+            break;
+        default:
+            LOG_ERROR(log, "Field_timestamp: Unrecognized Fractional Seconds Precision in field \'" <<
+                      field_name_arg << "\': \'" << type << "\'.");
+            // It's better to throw an exception to avoid segmfault
+            throw std::runtime_error("Field_timestamp: Unrecognized Fractional Seconds Precision in field \'" +
+                                     field_name_arg + "\': \'" + type + "\'.");
+            break;
+    }
+}
+
+const char* Field_timestamp_5_6::unpack(const char* from) {
+
+    // Was before MySQL 5.6.4
+    //uint32 tmp = uint4korr(from);
+
+    ulonglong tmp = 0;
+
+    // Reverse byte order
+    for (unsigned int i = 0; i < 4; ++i)
+        *((unsigned char *)&tmp + 3 - i) = *(from + i);
+
+    // Ignoring fractional part
+
+    field_data = tmp;
+
+    LOG_TRACE(log, "  timestamp: " << tmp << " // " << pack_length());
+
+    return from + pack_length();
+}
+
+
+// -=-=-=-=-=-=-=-=-=-=-=-
+// Datetime
+// -=-=-=-=-=-=-=-=-=-=-=-
+
+
+Field_datetime_5_5::Field_datetime_5_5(const std::string& field_name_arg, const std::string& type):
+    Field_str(field_name_arg, type)
+{
+    length_bytes = 8;
+}
+
+const char* Field_datetime_5_5::unpack(const char* from) {
+
+    ulonglong tmp = uint8korr(from);
+    field_data = tmp;
+
+    LOG_TRACE(log, "  datetime: " << tmp << " // " << pack_length());
+
+    return from + pack_length();
+}
+
+
+Field_datetime_5_6::Field_datetime_5_6(const std::string& field_name_arg, const std::string& type):
+    Field_str(field_name_arg, type)
+{
+    // Parsing FSP (Fractional Seconds Precision) to find out length in bytes
+
+    int digits = 0;
+    sscanf(type.c_str(), "datetime(%d)", &digits); // In case of just "datetime" digits should still be 0
+
+    switch (digits)
+    {
+        case 0:
+            length_bytes = 5;
+            break;
+        case 1:
+        case 2:
+            length_bytes = 6;
+            break;
+        case 3:
+        case 4:
+            length_bytes = 7;
+            break;
+        case 5:
+        case 6:
+            length_bytes = 8;
+            break;
+        default:
+            LOG_ERROR(log, "Field_datetime: Unrecognized Fractional Seconds Precision in field \'" <<
+                      field_name_arg << "\': \'" << type << "\'.");
+            // It's better to throw an exception to avoid segmfault
+            throw std::runtime_error("Field_datetime: Unrecognized Fractional Seconds Precision in field \'" +
+                                     field_name_arg + "\': \'" + type + "\'.");
+            break;
+    }
+}
+
+const char* Field_datetime_5_6::unpack(const char* from)
+{
+    // Was before MySQL 5.6.4
+    //ulonglong tmp = uint8korr(from);
+
+    ulonglong buf = 0;
+
+    // Reverse byte order
+    for (unsigned int i = 0; i < pack_length(); ++i)
+        *((unsigned char *)&buf + pack_length() - 1 - i) = *(from + i);
+
+    // Ignoring fractional part
+
+    ulonglong tmp = 0;
+    tmp += (buf >> (pack_length() * 8 - 40)) % (1 << 6) * 1;        // Seconds
+    tmp += (buf >> (pack_length() * 8 - 34)) % (1 << 6) * 100;      // Minutes
+    tmp += (buf >> (pack_length() * 8 - 28)) % (1 << 5) * 10000;    // Hours
+    tmp += (buf >> (pack_length() * 8 - 23)) % (1 << 5) * 1000000;  // Days
+
+    ulonglong months;
+    months = (buf >> (pack_length() * 8 - 18)) % (1 << 17);   // Months + 13 * years
+
+    tmp += months % 13 * 100000000;     // Months
+    tmp += months / 13 * 10000000000;   // Years
+
+    field_data = tmp;
+
+    LOG_TRACE(log, "  datetime: " << tmp << " // " << pack_length());
+
+    return from + pack_length();
+}
+
 
 } // namespace slave
