@@ -24,4 +24,4 @@ override_dh_strip:
 
 override_dh_auto_install:
 	dh_auto_install
-	mv debian/libslave-dev/usr/lib64 debian/libslave-dev/usr/lib
+	mv debian/tmp/usr/lib64 debian/tmp/usr/lib

@@ -20,10 +20,23 @@ std::string print(const std::string& type, const boost::any& v) {
         r += "'";
         return r;
 
-    } else {
+    }
+    else if (v.type() == typeid(char)) {
+        std::string r = "'";
+        r += std::to_string((int)(boost::any_cast<char>(v)));
+        r += "'";
+        return r;
+    }
+    else {
         std::ostringstream s;
 
-        if (v.type() == typeid(int))
+        if (v.type() == typeid(short))
+            s << boost::any_cast<short>(v);
+
+        else if (v.type() == typeid(unsigned short))
+            s << boost::any_cast<unsigned short>(v);
+
+        else if (v.type() == typeid(int))
             s << boost::any_cast<int>(v);
 
         else if (v.type() == typeid(unsigned int))

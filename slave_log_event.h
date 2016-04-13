@@ -126,7 +126,7 @@ enum enum_binlog_checksum_alg {
                                         // is checksum-capable New Master (NM).
     BINLOG_CHECKSUM_ALG_CRC32    = 1,   // CRC32 of zlib algorithm.
     BINLOG_CHECKSUM_ALG_ENUM_END,       // the cut line: valid arg range is [1, 0x7f].
-    BINLOG_CHECKSUM_ALG_UNDEF    = 255, // special value to tag undetemined yet checksum
+    BINLOG_CHECKSUM_ALG_UNDEF    = 255  // special value to tag undetemined yet checksum
                                         // or events from checksum-unaware servers
 };
 

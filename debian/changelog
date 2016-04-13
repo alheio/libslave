@@ -1,3 +1,12 @@
+libslave (1.2.0-1) UNRELEASED; urgency=low
+
+  [ Egorov Anton <github.com/dohxehapo> ]
+  * fixed tinyint (treated as char), short and unsigned short output
+  * temporal types bugfix: TIME, TIMESTAMP and DATETIME types storage
+  * temporal types from MYSQL 5.6 are now treated as temporal types from MYSQL 5.5
+
+ -- Zakharov Sergey  <zaharov.sy@gmail.com>  Wed, 13 Apr 2016 18:45:55 +0300
+
 libslave (1.1.0-1) UNRELEASED; urgency=low
 
   [ Egorov Anton <github.com/dohxehapo> ]
