@@ -11,9 +11,9 @@ Section: libs
 Architecture: any
 Depends: 
   ${shlibs:Depends},
-  libmysqlclient
-Description: mysql replication client dev headers
- c++ mysql replication client dev headers
+  libmysqlclient-dev
+Description: mysql replication client library
+ c++ mysql replication client library
 
 Package: libslave-dev
 Section: libdevel
@@ -21,7 +21,6 @@ Architecture: any
 Depends: 
   ${shlibs:Depends},
   libslave,
-  libboost-all-dev,
-  libmysqlclient-dev
+  libboost-all-dev
 Description: mysql replication client dev headers
  c++ mysql replication client dev headers
